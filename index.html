@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Rapid Fire - Mental Math Challenge</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Canvas for Confetti and Particle FX -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- ======================================================== -->
+  <!-- 1. WELCOME SCREEN (5 SECONDS COUNTDOWN WITH AUTO-START)  -->
+  <!-- ======================================================== -->
+  <section id="welcome-screen" class="screen active">
+    <div class="welcome-backdrop"></div>
+    <div class="welcome-container">
+      <div class="welcome-badge">⚡ Mental Math Speed Arena</div>
+      
+      <div class="logo-wrapper">
+        <div class="fire-icon-box">
+          <span class="fire-emoji">🔥</span>
+          <div class="glow-ring"></div>
+        </div>
+        <h1 class="app-title">RAPID <span class="highlight-fire">FIRE</span></h1>
+        <p class="app-tagline">Think Fast. Calculate Faster. Dominate the Numbers!</p>
+      </div>
+
+      <div class="welcome-features">
+        <div class="feature-chip">
+          <span class="chip-icon">🔢</span>
+          <span>Rapid Flash Stream</span>
+        </div>
+        <div class="feature-chip">
+          <span class="chip-icon">⚡</span>
+          <span>Speed Match Reflex</span>
+        </div>
+        <div class="feature-chip">
+          <span class="chip-icon">⏱️</span>
+          <span>Fast Reaction Bonus</span>
+        </div>
+      </div>
+
+      <!-- 5-Second Circular Countdown -->
+      <div class="countdown-widget">
+        <div class="timer-svg-box">
+          <svg class="timer-circle-svg" viewBox="0 0 100 100">
+            <circle class="timer-track" cx="50" cy="50" r="44"></circle>
+            <circle class="timer-progress" id="welcome-progress-ring" cx="50" cy="50" r="44"></circle>
+          </svg>
+          <div class="timer-number-display">
+            <span id="welcome-countdown-text">5.0</span>
+            <span class="timer-unit">SEC</span>
+          </div>
+        </div>
+        <div class="countdown-caption">Starting automatically in <strong id="welcome-seconds-left">5</strong> seconds...</div>
+      </div>
+
+      <div class="welcome-actions">
+        <button id="skip-welcome-btn" class="btn btn-primary pulse-btn">
+          <span>🚀 Jump In Now</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- APP HEADER (Common navigation and sound/stat toggles)    -->
+  <!-- ======================================================== -->
+  <header class="app-header" id="app-header">
+    <div class="header-left">
+      <button id="home-nav-btn" class="brand-link" title="Return to Dashboard">
+        <span class="brand-flame">🔥</span>
+        <span class="brand-text">RAPID <span>FIRE</span></span>
+      </button>
+    </div>
+
+    <div class="header-stats">
+      <div class="stat-pill" title="Current streak">
+        <span class="stat-icon">🔥</span>
+        <span id="header-streak-count">0</span>
+        <span class="stat-label">Streak</span>
+      </div>
+      <div class="stat-pill" title="Total score">
+        <span class="stat-icon">⭐</span>
+        <span id="header-score-count">0</span>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button id="sound-toggle-btn" class="icon-btn" title="Toggle Sound (Mute/Unmute)">
+        <span id="sound-icon">🔊</span>
+      </button>
+      <button id="help-modal-btn" class="icon-btn" title="How to Play">
+        <span>❓</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ======================================================== -->
+  <!-- 2. MAIN DASHBOARD / MODE SELECTION                       -->
+  <!-- ======================================================== -->
+  <main id="main-container">
+    <section id="dashboard-screen" class="screen">
+      <div class="dashboard-hero">
+        <h2>Choose Your <span class="gradient-text">Challenge</span></h2>
+        <p>Pick a game mode to boost your mental math calculations and reflexes!</p>
+      </div>
+
+      <div class="modes-grid">
+        <!-- MODE 1 CARD: RAPID FLASH STREAM -->
+        <div class="mode-card card-flash" id="card-mode-1">
+          <div class="card-glow"></div>
+          <div class="card-header">
+            <div class="mode-icon-circle blue-gradient">
+              <span>🔢</span>
+            </div>
+            <div class="mode-badge">Mode 1</div>
+          </div>
+          <h3 class="card-title">Rapid Flash Numbers</h3>
+          <p class="card-desc">Numbers flash rapidly on screen one after another. Keep calculating mentally, then choose the final answer!</p>
+          
+          <div class="mode-spec-pills">
+            <span class="spec-pill">Level 1: Only (+ve)</span>
+            <span class="spec-pill">Level 2: (+ve) & (-ve)</span>
+            <span class="spec-pill">Level 3: (×) & (÷)</span>
+            <span class="spec-pill highlight">Delay: 0.5s - 3s</span>
+          </div>
+
+          <button class="btn btn-primary start-flash-btn" onclick="openModeConfig(1)">
+            <span>Configure & Play ⚡</span>
+          </button>
+        </div>
+
+        <!-- MODE 2 CARD: SPEED MATCH REFLEX -->
+        <div class="mode-card card-speed" id="card-mode-2">
+          <div class="card-glow"></div>
+          <div class="card-header">
+            <div class="mode-icon-circle amber-gradient">
+              <span>⚡</span>
+            </div>
+            <div class="mode-badge">Mode 2</div>
+          </div>
+          <h3 class="card-title">Two Numbers Speed Reflex</h3>
+          <p class="card-desc">Two numbers and one question. Answer before time ticks down — the faster your response time, the higher your score!</p>
+          
+          <div class="mode-spec-pills">
+            <span class="spec-pill">Dynamic Speed Scoring</span>
+            <span class="spec-pill">1000 Pts Lightning Max</span>
+            <span class="spec-pill">Streak Multiplier</span>
+            <span class="spec-pill highlight">Faster = Bigger Score!</span>
+          </div>
+
+          <button class="btn btn-secondary start-speed-btn" onclick="openModeConfig(2)">
+            <span>Configure & Play 🎯</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Best Scores Banner -->
+      <div class="dashboard-stats-strip">
+        <div class="stat-box">
+          <div class="stat-number" id="stats-total-played">0</div>
+          <div class="stat-name">Games Completed</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number" id="stats-accuracy">0%</div>
+          <div class="stat-name">Overall Accuracy</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number" id="stats-fastest-reflex">-</div>
+          <div class="stat-name">Fastest Reaction</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number" id="stats-best-score">0</div>
+          <div class="stat-name">Best Mode 2 Score</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- 3. CONFIG MODAL / SETUP SCREEN                           -->
+    <!-- ======================================================== -->
+    <div id="config-modal" class="modal-overlay hidden">
+      <div class="modal-content glass-card">
+        <button class="modal-close-btn" onclick="closeConfigModal()">✕</button>
+
+        <!-- CONFIG CONTENT FOR MODE 1 -->
+        <div id="config-mode-1" class="mode-config-view">
+          <div class="modal-head">
+            <div class="modal-icon">🔢</div>
+            <div>
+              <h3>Rapid Flash Numbers Setup</h3>
+              <p>Configure speed and calculation difficulty</p>
+            </div>
+          </div>
+
+          <div class="config-section">
+            <label class="config-label">Select Level</label>
+            <div class="level-selector-grid">
+              <button type="button" class="level-option active" data-level="1" onclick="selectFlashLevel(1)">
+                <div class="level-tag">Level 1</div>
+                <div class="level-title">Only Positive Numbers</div>
+                <div class="level-sub">Pure Addition (+ve)</div>
+              </button>
+              <button type="button" class="level-option" data-level="2" onclick="selectFlashLevel(2)">
+                <div class="level-tag">Level 2</div>
+                <div class="level-title">Positive & Negative</div>
+                <div class="level-sub">Addition & Subtraction (+ & -)</div>
+              </button>
+              <button type="button" class="level-option" data-level="3" onclick="selectFlashLevel(3)">
+                <div class="level-tag">Level 3</div>
+                <div class="level-title">Mixed Operations</div>
+                <div class="level-sub">Includes (×) and (÷)</div>
+              </button>
+            </div>
+          </div>
+
+          <!-- TIME DELAY (0.5s to 3.0s as specified in requirements) -->
+          <div class="config-section">
+            <div class="label-with-value">
+              <label class="config-label">Time Delay Between Numbers</label>
+              <span class="value-badge" id="delay-display-val">1.0 sec</span>
+            </div>
+            
+            <div class="delay-slider-container">
+              <input type="range" id="time-delay-slider" min="0.5" max="3.0" step="0.1" value="1.0" oninput="updateDelaySlider(this.value)">
+              <div class="slider-marks">
+                <span>0.5s (Lightning)</span>
+                <span>1.0s</span>
+                <span>1.5s</span>
+                <span>2.0s</span>
+                <span>3.0s (Relaxed)</span>
+              </div>
+            </div>
+
+            <div class="preset-chips">
+              <button type="button" class="preset-chip" onclick="setDelayPreset(0.5)">⚡ 0.5s Fast</button>
+              <button type="button" class="preset-chip active" onclick="setDelayPreset(1.0)">⭐ 1.0s Standard</button>
+              <button type="button" class="preset-chip" onclick="setDelayPreset(1.5)">🕒 1.5s Medium</button>
+              <button type="button" class="preset-chip" onclick="setDelayPreset(2.0)">🐢 2.0s Easy</button>
+              <button type="button" class="preset-chip" onclick="setDelayPreset(3.0)">🧘 3.0s Relaxed</button>
+            </div>
+          </div>
+
+          <!-- NUMBER COUNT & DIGIT SIZE -->
+          <div class="config-row-two">
+            <div class="config-sub">
+              <label class="config-label">Numbers to Flash</label>
+              <div class="segmented-control" id="flash-count-selector">
+                <button type="button" class="segment-btn" data-count="3">3</button>
+                <button type="button" class="segment-btn active" data-count="5">5</button>
+                <button type="button" class="segment-btn" data-count="8">8</button>
+                <button type="button" class="segment-btn" data-count="10">10</button>
+              </div>
+            </div>
+            <div class="config-sub">
+              <label class="config-label">Digit Range</label>
+              <div class="segmented-control" id="digit-range-selector">
+                <button type="button" class="segment-btn active" data-range="single">1 Digit (1-9)</button>
+                <button type="button" class="segment-btn" data-range="double">2 Digits (10-99)</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeConfigModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="startFlashGame()">Start Rapid Numbers 🚀</button>
+          </div>
+        </div>
+
+        <!-- CONFIG CONTENT FOR MODE 2 -->
+        <div id="config-mode-2" class="mode-config-view hidden">
+          <div class="modal-head">
+            <div class="modal-icon">⚡</div>
+            <div>
+              <h3>Two Numbers Speed Reflex Setup</h3>
+              <p>Solve 2-number equations fast to maximize your score!</p>
+            </div>
+          </div>
+
+          <div class="speed-scoring-banner">
+            <div class="banner-icon">💡</div>
+            <div class="banner-text">
+              <strong>Speed Formula:</strong> Respond in &lt;1.0s to score up to <strong>1000 points</strong> per question! Slower responses give less points.
+            </div>
+          </div>
+
+          <div class="config-section">
+            <label class="config-label">Operations</label>
+            <div class="operation-selector-grid">
+              <button type="button" class="op-chip active" data-op="add">➕ Addition</button>
+              <button type="button" class="op-chip" data-op="sub">➖ Subtraction</button>
+              <button type="button" class="op-chip" data-op="mul">✖️ Multiplication</button>
+              <button type="button" class="op-chip" data-op="div">➗ Division</button>
+              <button type="button" class="op-chip" data-op="mixed">🎲 All Mixed</button>
+            </div>
+          </div>
+
+          <div class="config-row-two">
+            <div class="config-sub">
+              <label class="config-label">Difficulty</label>
+              <div class="segmented-control" id="speed-diff-selector">
+                <button type="button" class="segment-btn" data-diff="easy">Easy (1-12)</button>
+                <button type="button" class="segment-btn active" data-diff="medium">Medium (10-50)</button>
+                <button type="button" class="segment-btn" data-diff="hard">Hard (20-100)</button>
+              </div>
+            </div>
+            <div class="config-sub">
+              <label class="config-label">Questions</label>
+              <div class="segmented-control" id="speed-rounds-selector">
+                <button type="button" class="segment-btn active" data-rounds="10">10 Questions</button>
+                <button type="button" class="segment-btn" data-rounds="20">20 Questions</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeConfigModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="startSpeedGame()">Start Speed Duel ⚡</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- 4. GAME ARENA: MODE 1 (RAPID FLASH STREAM)               -->
+    <!-- ======================================================== -->
+    <section id="game-flash-screen" class="screen">
+      <div class="arena-header">
+        <button class="btn-ghost-back" onclick="confirmQuitGame()">← Exit to Hub</button>
+        <div class="arena-level-pill" id="flash-arena-level">Level 1: Addition</div>
+        <div class="arena-delay-pill" id="flash-arena-delay">Delay: 1.0s</div>
+      </div>
+
+      <!-- Preparation Countdown Overlay (3, 2, 1, GO!) -->
+      <div id="flash-prep-overlay" class="prep-overlay">
+        <div class="prep-card">
+          <div class="prep-sub">GET READY TO CALCULATE!</div>
+          <div class="prep-counter" id="prep-countdown-number">3</div>
+          <div class="prep-hint" id="prep-hint-text">Watch the flashing numbers and calculate the sum mentally!</div>
+        </div>
+      </div>
+
+      <!-- Flash Number Streaming Box -->
+      <div id="flash-streaming-area" class="streaming-area">
+        <div class="stream-progress-bar-container">
+          <div class="stream-progress-bar" id="flash-progress-bar"></div>
+        </div>
+        
+        <div class="stream-counter-text" id="flash-step-indicator">Number 1 of 5</div>
+
+        <div class="flash-card-display" id="flash-card">
+          <div class="flash-pulse-border"></div>
+          <div class="flash-operator" id="flash-op-badge"></div>
+          <div class="flash-number-hero" id="flash-hero-number">+0</div>
+          <div class="flash-subtext" id="flash-tempo-subtext">Memorize &amp; compute...</div>
+        </div>
+
+        <div class="tempo-meter">
+          <span class="tempo-dot"></span>
+          <span id="tempo-status-text">Speed: 1.0s per number</span>
+        </div>
+      </div>
+
+      <!-- Final Answer Phase (Choose Answer) -->
+      <div id="flash-answer-area" class="answer-area hidden">
+        <div class="answer-banner">
+          <div class="answer-title">What is the Final Answer?</div>
+          <div class="answer-subtitle">Choose the correct mental sum from below:</div>
+        </div>
+
+        <div class="options-grid" id="flash-options-container">
+          <!-- Dynamically inserted 4 multiple choice buttons -->
+        </div>
+
+        <div class="quick-numpad-toggle">
+          <button class="btn-text-link" onclick="toggleDirectInput()">Or type exact number keyboard ⌨️</button>
+        </div>
+
+        <div id="direct-input-box" class="direct-input-box hidden">
+          <input type="number" id="direct-input-field" placeholder="Enter answer..." onkeydown="handleDirectInputKey(event)">
+          <button class="btn btn-primary" onclick="submitDirectInput()">Submit</button>
+        </div>
+      </div>
+
+      <!-- Step-by-Step Breakdown after choosing answer -->
+      <div id="flash-breakdown-card" class="breakdown-card hidden">
+        <div class="breakdown-header" id="breakdown-result-header">
+          <span class="result-icon">🎉</span>
+          <div class="result-text-box">
+            <h4 id="breakdown-result-title">Brilliant! That's Correct!</h4>
+            <p id="breakdown-result-msg">+500 Points earned!</p>
+          </div>
+        </div>
+
+        <div class="calculation-trail">
+          <div class="trail-title">Calculation Sequence:</div>
+          <div class="trail-items" id="trail-items-container">
+            <!-- Filled dynamically: e.g. 12 -> + 7 = 19 -> - 4 = 15 -->
+          </div>
+        </div>
+
+        <div class="breakdown-actions">
+          <button class="btn btn-secondary" onclick="restartCurrentFlashRound()">Play Again (Same Settings)</button>
+          <button class="btn btn-primary" onclick="nextFlashRound()">Next Round →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- 5. GAME ARENA: MODE 2 (SPEED MATCH - TWO NUMBERS REFLEX) -->
+    <!-- ======================================================== -->
+    <section id="game-speed-screen" class="screen">
+      <div class="arena-header">
+        <button class="btn-ghost-back" onclick="confirmQuitGame()">← Exit to Hub</button>
+        <div class="speed-question-tracker" id="speed-q-tracker">Question 1 / 10</div>
+        <div class="speed-live-score" id="speed-live-score">Score: 0</div>
+      </div>
+
+      <!-- Real-time Speed Timer and Dynamic Score Indicator -->
+      <div class="speed-timer-wrap">
+        <div class="speed-timer-bar-track">
+          <div class="speed-timer-bar-fill" id="speed-timer-bar"></div>
+        </div>
+        <div class="speed-time-info">
+          <div class="current-time-badge">
+            <span>⏱️ Response Time: </span>
+            <strong id="live-time-counter">0.00s</strong>
+          </div>
+          <div class="dynamic-score-preview" id="dynamic-score-display">
+            Potential Points: <strong id="potential-points-val">1000</strong> pts
+          </div>
+        </div>
+      </div>
+
+      <!-- The Two Numbers Problem Area -->
+      <div class="speed-question-card">
+        <div class="speed-streak-tag hidden" id="speed-streak-tag">🔥 3X COMBO!</div>
+        
+        <div class="equation-display">
+          <span class="eq-num" id="speed-num1">24</span>
+          <span class="eq-op" id="speed-operator">+</span>
+          <span class="eq-num" id="speed-num2">17</span>
+          <span class="eq-equals">=</span>
+          <span class="eq-question-mark">?</span>
+        </div>
+
+        <div class="speed-prompt-text">Pick the answer as fast as possible for the highest score!</div>
+      </div>
+
+      <!-- 4 Multiple Choice Options -->
+      <div class="speed-options-grid" id="speed-options-container">
+        <!-- 4 buttons dynamically inserted with keyboard shortcuts [1], [2], [3], [4] -->
+      </div>
+
+      <!-- Speed Feedback Splash on Answer -->
+      <div id="speed-feedback-overlay" class="speed-feedback-overlay hidden">
+        <div class="feedback-badge" id="feedback-badge-content">
+          <span class="fb-icon">⚡</span>
+          <span class="fb-text">LIGHTNING FAST!</span>
+          <span class="fb-score">+940 PTS</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- 6. ROUND SUMMARY & LEADERBOARD RESULTS                   -->
+    <!-- ======================================================== -->
+    <section id="results-screen" class="screen">
+      <div class="results-card glass-card">
+        <div class="results-trophy-box">
+          <span class="trophy-emoji" id="results-trophy-emoji">🏆</span>
+          <h2 id="results-title">Challenge Completed!</h2>
+          <p id="results-subtitle">Great mental agility workout!</p>
+        </div>
+
+        <div class="results-grid">
+          <div class="result-tile">
+            <div class="tile-icon">⭐</div>
+            <div class="tile-val" id="res-score">0</div>
+            <div class="tile-label">Final Score</div>
+          </div>
+          <div class="result-tile">
+            <div class="tile-icon">🎯</div>
+            <div class="tile-val" id="res-accuracy">0%</div>
+            <div class="tile-label">Accuracy</div>
+          </div>
+          <div class="result-tile">
+            <div class="tile-icon">⚡</div>
+            <div class="tile-val" id="res-avg-time">0.00s</div>
+            <div class="tile-label">Avg Response Time</div>
+          </div>
+          <div class="result-tile">
+            <div class="tile-icon">🔥</div>
+            <div class="tile-val" id="res-best-streak">0</div>
+            <div class="tile-label">Max Streak</div>
+          </div>
+        </div>
+
+        <!-- Question Review Accordion / List -->
+        <div class="review-section">
+          <h4>Round Breakdown &amp; Speed Analysis</h4>
+          <div class="review-items-list" id="review-items-list">
+            <!-- Dynamically populated with question, user choice, correct choice, time taken -->
+          </div>
+        </div>
+
+        <div class="results-actions">
+          <button class="btn btn-secondary" onclick="returnToDashboard()">Return to Hub</button>
+          <button class="btn btn-primary" id="results-play-again-btn">Play Again 🚀</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- 7. HELP & RULES MODAL                                    -->
+    <!-- ======================================================== -->
+    <div id="help-modal" class="modal-overlay hidden">
+      <div class="modal-content glass-card">
+        <button class="modal-close-btn" onclick="closeHelpModal()">✕</button>
+        <div class="modal-head">
+          <div class="modal-icon">📖</div>
+          <div>
+            <h3>How to Play Rapid Fire</h3>
+            <p>Rules &amp; tips for students</p>
+          </div>
+        </div>
+
+        <div class="help-scroll-content">
+          <div class="help-item">
+            <div class="help-title">🔢 Mode 1: Rapid Flash Numbers</div>
+            <p>Numbers flash one after another. You keep the running sum in your head!</p>
+            <ul>
+              <li><strong>Level 1:</strong> Only positive numbers (+ve) - great for building addition speed.</li>
+              <li><strong>Level 2:</strong> Positive and negative numbers (+ve & -ve) - practise swift mental subtraction.</li>
+              <li><strong>Level 3:</strong> Includes (×) and (÷) operations in between - ultimate mental math workout!</li>
+              <li><strong>Time Delay:</strong> Adjust how fast the numbers flash, from 0.5 sec (speed demon) to 3.0 sec (relaxed pace).</li>
+              <li>At the end, choose the correct answer from the 4 options!</li>
+            </ul>
+          </div>
+
+          <div class="help-item">
+            <div class="help-title">⚡ Mode 2: Two Numbers Speed Reflex</div>
+            <p>An equation with two numbers is presented. Your mission is speed!</p>
+            <ul>
+              <li><strong>The Faster You Respond, The More Points You Earn:</strong><br>
+                Answers in under 1.0s score up to 1000 points. Points drop as the reaction timer ticks.</li>
+              <li><strong>Combos:</strong> Answering multiple questions in a row triggers Fire Streaks and multipliers!</li>
+            </ul>
+          </div>
+
+          <div class="help-item">
+            <div class="help-title">⌨️ Keyboard Shortcuts</div>
+            <ul>
+              <li>Press <strong>[1], [2], [3], [4]</strong> on your keyboard to instantly select answers.</li>
+              <li>Press <strong>[Space]</strong> or <strong>[Enter]</strong> to proceed to the next question.</li>
+              <li>Press <strong>[Esc]</strong> to exit to the hub.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-primary" onclick="closeHelpModal()">Got It! Let's Play 🔥</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
